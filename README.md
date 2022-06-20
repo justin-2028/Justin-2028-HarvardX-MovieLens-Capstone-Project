@@ -1,5 +1,4 @@
 # HarvardX-MovieLens-Capstone-Project
-<br />
 
 
 # Instructions
