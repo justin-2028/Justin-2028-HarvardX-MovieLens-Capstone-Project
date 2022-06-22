@@ -4,6 +4,12 @@
 # Start/End Date: 4/23/22 - 6/20/22
 ################################################################################
 
+#############################
+# edX set and validation set
+#############################
+
+if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
+if(!require(dslabs)) install.packages("dslabs", repos = "http://cran.us.r-project.org")
 if(!require(tidyverse)) install.packages("tidyverse", repos = "http://cran.us.r-project.org")
 if(!require(caret)) install.packages("caret", repos = "http://cran.us.r-project.org")
 if(!require(data.table)) install.packages("data.table", repos = "http://cran.us.r-project.org")
@@ -13,5 +19,19 @@ if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 if(!require(lubridate)) install.packages("lubridate", repos = "http://cran.us.r-project.org")
 if(!require(kableExtra)) install.packages("kableExtra", repos = "http://cran.us.r-project.org")
+
+# Loading packages through library() to detect package issues early on
+
+library(dslabs)
+library(dplyr)
+library(tidyverse)
+library(caret)
+library(data.table)
+library(ggplot2)
+library(stringr)
+library(knitr)
+library(scales)
+library(lubridate)
+library(kableExtra)
 
 
