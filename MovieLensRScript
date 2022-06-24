@@ -4,9 +4,11 @@
 # Start/End Date: 4/23/22 - 6/24/22
 ################################################################################
 
-#############################
-# edX set and validation set
-#############################
+######################################
+# Creating the EdX and Validation Sets
+######################################
+
+# Required packages will install, allow several minutes to complete.
 
 if(!require(dplyr)) install.packages("dplyr", repos = "http://cran.us.r-project.org")
 if(!require(dslabs)) install.packages("dslabs", repos = "http://cran.us.r-project.org")
@@ -19,20 +21,9 @@ if(!require(knitr)) install.packages("knitr", repos = "http://cran.us.r-project.
 if(!require(scales)) install.packages("scales", repos = "http://cran.us.r-project.org")
 if(!require(lubridate)) install.packages("lubridate", repos = "http://cran.us.r-project.org")
 if(!require(kableExtra)) install.packages("kableExtra", repos = "http://cran.us.r-project.org")
-
-# Loading packages through library() to detect package issues early on
-
-library(dslabs)
-library(dplyr)
-library(tidyverse)
-library(caret)
-library(data.table)
-library(ggplot2)
-library(stringr)
-library(knitr)
-library(scales)
-library(lubridate)
-library(kableExtra)
+if(!require(ggthemes)) install.packages("ggthemes", repos = "http://cran.us.r-project.org")
+if(!require(GGally)) install.packages("GGally", repos = "http://cran.us.r-project.org")
+if(!require(ggExtra)) install.packages("ggExtra", repos = "http://cran.us.r-project.org")
 
 # MovieLens 10M dataset:
 # https://grouplens.org/datasets/movielens/10m/
@@ -52,7 +43,7 @@ movies <- as.data.frame(movies) %>% mutate(movieId = as.numeric(levels(movieId))
 
 movielens <- left_join(ratings, movies, by = "movieId")
 
-# Validation set will be 10% of MovieLens data
+# Validation set will be 10% of MovieLens data.
 
 set.seed(1, sample.kind="Rounding")
 # if using R 3.5 or earlier, use `set.seed(1)` instead
@@ -60,13 +51,13 @@ test_index <- createDataPartition(y = movielens$rating, times = 1, p = 0.1, list
 edx <- movielens[-test_index,]
 temp <- movielens[test_index,]
 
-# Make sure userId and movieId in validation set are also in edx set
+# Make sure userId and movieId in validation set are also in edx set.
 
 validation <- temp %>% 
   semi_join(edx, by = "movieId") %>%
   semi_join(edx, by = "userId")
 
-# Add rows removed from validation set back into edx set
+# Add rows removed from validation set back into edx set.
 
 removed <- anti_join(temp, validation)
 edx <- rbind(edx, removed)
@@ -74,7 +65,40 @@ edx <- rbind(edx, removed)
 rm(dl, ratings, movies, test_index, temp, movielens, removed)
 
 
-############################################################
-# Beginning of Analysis
-############################################################
+##############################################
+# Saving Necessary Files and Loading Libraries
+##############################################
 
+# Saving the files for the edX and validation sets.
+save(edx, file="edx.RData")
+save(validation, file = "validation.RData")
+
+# Loading libraries through library() instead of require() to detect potential package issues early on.
+
+library(dslabs)
+library(dplyr)
+library(tidyverse)
+library(caret)
+library(data.table)
+library(ggplot2)
+library(stringr)
+library(knitr)
+library(scales)
+library(lubridate)
+library(kableExtra)
+library(ggthemes)
+library(GGally)
+library(ggExtra)
+
+##############################################
+# Beginning of Exploratory Data Analysis (EDA)
+##############################################
+
+
+# Examining initial data
+str(edx)
+str(validation)
+
+# Displays a sample of the edX dataset, along with a statistical summary of the data
+head(edx)
+summary(edx)
