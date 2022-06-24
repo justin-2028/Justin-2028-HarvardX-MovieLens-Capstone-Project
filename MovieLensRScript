@@ -75,6 +75,6 @@ rm(dl, ratings, movies, test_index, temp, movielens, removed)
 
 
 ############################################################
-# Beginning of Exploratory Analysis and End of Provided Code
+# Beginning of Analysis
 ############################################################
 
