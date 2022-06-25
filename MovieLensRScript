@@ -102,3 +102,58 @@ str(validation)
 # Displays a sample of the edX dataset, along with a statistical summary of the data
 head(edx)
 summary(edx)
+
+# Checking for any NA (missing) values in the edx dataset.
+anyNA(edx)
+
+# Finding the number of unique movies and users in provided data
+edx %>% 
+  summarize(n_users = n_distinct(userId),
+            n_movies = n_distinct(movieId))
+
+# Creating histogram of the ratings
+edx%>% ggplot(aes(rating))+
+  geom_histogram(bins=10,fill="navy",col="blue") +
+  scale_x_continuous(breaks = seq(0.5,5,0.5)) 
+
+# Finding the number of movie ratings that each of the top 5 movies have
+edx %>% group_by(rating) %>% 
+  summarize(count = n()) %>% 
+  arrange(desc(count)) %>%
+  top_n(5)
+
+# Graphing the number of movie ratings for each unique userId
+edx %>% count(userId) %>% 
+  ggplot(aes(n))+
+  geom_histogram(bins = 20, col = "navy" , fill= "blue")+
+  ggtitle("Number of Rating Per User")+
+  scale_x_log10()+
+  theme_gray()+
+  xlab("Ratings")+
+  ylab("Users")
+
+# Graphing the number of movie ratings for each unique movieId
+edx %>% count(movieId) %>%
+  ggplot(aes(n))+
+  geom_histogram(bins = 20, col = "navy" , fill= "blue")+
+  ggtitle("Number of Rating Per User")+
+  scale_x_log10()+
+  theme_gray()+
+  xlab("Ratings")+
+  ylab("Movies")
+
+# Graphing average rating per unique movieId
+edx %>% group_by(movieId) %>%
+  summarise(ave_rating = sum(rating)/n()) %>%
+  ggplot(aes(ave_rating)) +
+  geom_histogram(bins = 20, col = "navy" , fill= "blue") +
+  xlab("Average Rating")+
+  ylab("Number of Movies")
+
+# Graphing average rating per unique userId
+edx %>% group_by(userId) %>%
+  summarise(ave_rating = sum(rating)/n()) %>%
+  ggplot(aes(ave_rating)) +
+  geom_histogram(bins = 20, col = "navy" , fill= "blue") +
+  xlab("Average Rating")+
+  ylab("Number of Users")
