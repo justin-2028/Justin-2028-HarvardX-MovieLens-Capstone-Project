@@ -157,3 +157,5 @@ edx %>% group_by(userId) %>%
   geom_histogram(bins = 20, col = "navy" , fill= "blue") +
   xlab("Average Rating")+
   ylab("Number of Users")
+  
+ #Graphign
