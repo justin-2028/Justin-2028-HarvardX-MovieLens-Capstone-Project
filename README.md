@@ -12,6 +12,6 @@ As the instructions necessitate, the following three files are attached: <br />
 
 # c. Timeline of Project
 4/23/22 - Start Date <br />
-5/29/22 - Completion of Rmd and RScript <br />
+6/15/22 - Completion of Rmd and RScript <br />
 7/30/22 - End Date <br />
 
