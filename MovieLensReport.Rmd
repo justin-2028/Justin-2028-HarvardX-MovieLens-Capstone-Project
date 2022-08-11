@@ -413,4 +413,4 @@ Machine learning algorithm was built to predict movie ratings with MovieLens dat
 
 The Regularized movie and user effect model is characterized by the lower RMSE value and is hence the optimal model to use for the present project.
 
-We could also say that some improvements in the RMSE could be achieved by adding other parameters (genre, year, age). Other different machine learning models could also improve the results further, but hardware limitations, as the RAM, are a constraint.
+We could also say that some improvements in the RMSE could be achieved by adding other parameters (genre, year, age). Other different machine learning models could also improve the results further, but hardware limitations, such as the RAM, are a constraint.
