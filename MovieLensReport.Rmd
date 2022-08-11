@@ -210,7 +210,7 @@ RMSE <- function(true_ratings, predicted_ratings){
 The quality of the model will be assessed by the RMSE (the lower the better).
 
 
-### I. Naive model
+### I. Naive Model
 
 Creating a prediction system that only utilizes the sample mean. This implies that every prediction is the sample average. 
 
@@ -240,7 +240,7 @@ rmse_results %>% knitr::kable()
 
 This give us our baseline RMSE to compare with next modelling approaches.
 
-### II.  Movie effect model
+### II.  Movie Effect Model
 
 Higher ratings are mostly linked to popular movies among users and the opposite is true for unpopular movies. 
 
@@ -278,7 +278,7 @@ rmse_results %>% knitr::kable()
 So we have predicted movie rating based on the fact that movies are rated differently by adding the computed $b_{i}$ to $\mu$. If an individual movie is on average rated worse that the average rating of all movies $\mu$ , we predict that it will rated lower that $\mu$ by $b_{i}$, the difference of the individual movie average from the total average.
 
 
-### III. Movie and user effect model
+### III. Movie + User Effects Model
 
 It is understood that users may have a tendency to rate movies higher or lower than the overall mean. Let's add this into the model. First we'll calculate the bias for each user:
 
@@ -328,82 +328,63 @@ Our rating predictions further reduced the RMSE. But we made stil mistakes on ou
 Large errors can increase our RMSE. 
 
 
-### IV. Regularized movie and user effect model
+### IV. Movie + User Effects + Age Effects Model
 
-This model implements the concept of regularization to account for the effect of low ratings' numbers for movies and users. In  previous sections we demonstrated that few movies were rated only once and that some users only rated few movies.Hence this can strongly influence the prediction. Regularization is a method used to reduce the effect of overfitting.
+Similar to the movie effect, we now further add the bias of user effect (b_u) to the movie effect model.
 
-We should find the value of lambda (that is a tuning parameter) that will minimize the RMSE. This shrinks the $b_{i}$ and $b_{u}$ in case of small number of ratings.
-
-Consider that we have to choose the best lambda based on the training data (edx) , not based in validation date because it would produce overtraining. (Rmemeber, you don't know the ratings of validation data, it's only used for testing)
-
-```{r lambdas, echo = TRUE}
-lambdas <- seq(0, 10, 0.25)
-rmses <- sapply(lambdas, function(l){
-  
-  mu <- mean(edx$rating)
-  
-  b_i <- edx %>% 
-    group_by(movieId) %>%
-    summarize(b_i = sum(rating - mu)/(n()+l),.groups = 'drop')
-  
-  b_u <- edx %>% 
-    left_join(b_i, by="movieId") %>%
-    group_by(userId) %>%
-    summarize(b_u = sum(rating - b_i - mu)/(n()+l),.groups = 'drop')
-  
-  predicted_ratings <- 
-    edx %>% 
-    left_join(b_i, by = "movieId") %>%
-    left_join(b_u, by = "userId") %>%
-    mutate(pred = mu + b_i + b_u) %>%
-    pull(pred)
-  
-  return(RMSE(predicted_ratings, edx$rating))
-})
-```
-
-
-We plot RMSE vs lambdas to select the optimal lambda
-
-```{r plot_lambdas, echo = TRUE}
-qplot(lambdas, rmses)  
-```
-
-The optimal lambda is:
-
-```{r min_lambda, echo = TRUE}
-lambda <- lambdas[which.min(rmses)]
-lambda
-```
-
-For the full model, the optimal lambda is: 0.5
-
-The new results based on validation data will be:
-
-
-```{r rmse_results2, echo = TRUE}
-b_i <- edx %>% 
-    group_by(movieId) %>%
-    summarize(b_i = sum(rating - mu)/(n()+lambda),.groups = 'drop')
-  
-b_u <- edx %>% 
-    left_join(b_i, by="movieId") %>%
-    group_by(userId) %>%
-    summarize(b_u = sum(rating - b_i - mu)/(n()+lambda),.groups = 'drop')
-  
-predicted_ratings <- 
-    validation %>% 
-    left_join(b_i, by = "movieId") %>%
-    left_join(b_u, by = "userId") %>%
-    mutate(pred = mu + b_i + b_u) %>%
-    pull(pred)
-  
-model_3_rmse <- RMSE(predicted_ratings, validation$rating)
+```{r message=FALSE, warning=FALSE}
+#calculating and plot b_u distribution
+user_effects <- edx %>% 
+  left_join(movie_effects, by='movieId') %>%
+  group_by(userId) %>%
+  summarize(b_u = mean(rating - mu_hat - b_m))
+user_effects %>% qplot(b_u, geom ="histogram", bins = 10, data = ., color = I("blue")) 
+#calculating predicted ratings
+predicted_ratings_m_u <- validation %>% 
+  left_join(movie_effects, by='movieId') %>%
+  left_join(user_effects, by='userId') %>%
+  mutate(prediction = mu_hat + b_m + b_u) %>%
+  pull(prediction)
+#calculating model_m_rmse with consideration of movie + user effects  
+model_m_u_rmse <- RMSE(validation$rating,predicted_ratings_m_u)
 rmse_results <- bind_rows(rmse_results,
-                          data_frame(method="Regularized movie and user effect model",  
-                                     RMSE = model_3_rmse))
+                          data_frame(Model="Movie + User Effects Model",  
+                                     RMSE = model_m_u_rmse))
 rmse_results %>% knitr::kable()
 ```
+
+Again, the new RMSE by adding movieId and userId together drops from 0.9439 to 0.8653. The movie and user effect model further improves predication accuracy around 18.5% compared with "Only by average rating" model.
+
+In data analysis part, we estimate the time effect would be weak. What will new RMSE be by adding movie age on top of movie and user effect?
+
+### V. Movie + User Effects Regularization Model
+
+We now further add the bias of movie age effect (b_a) to the movie + user effect model.
+
+```{r message=FALSE, warning=FALSE}
+#calculating and plot b_a distribution
+ages_effects <- edx %>% 
+  left_join(movie_effects, by='movieId') %>%
+  left_join(user_effects, by='userId') %>%
+  group_by(ages) %>%
+  summarize(b_a = mean(rating - mu_hat - b_m - b_u))
+ages_effects %>% qplot(b_a, geom ="histogram", bins = 10, data = ., color = I("blue"))
+#calculating predicted ratings
+predicted_ratings_m_u_a <- validation %>% 
+  left_join(movie_effects, by='movieId') %>%
+  left_join(user_effects, by='userId') %>%
+  left_join(ages_effects, by='ages') %>%
+  mutate(prediction = mu_hat + b_m + b_u + b_a) %>%
+  pull(prediction)
+#calculating model_m_rmse with consideration of movie + user + age effects  
+model_m_u_a_rmse <- RMSE(validation$rating,predicted_ratings_m_u_a)
+rmse_results <- bind_rows(rmse_results,
+                          data_frame(Model="Movie + User + Age Effects Model",
+                                     RMSE = model_m_u_a_rmse))
+rmse_results %>% knitr::kable()
+```
+
+As expected, the difference of RMSE is only 0.00045 with additional consideration of age effect which confirms our judgment of weak effect by movie's age.
 
 \pagebreak
 
@@ -411,11 +392,11 @@ rmse_results %>% knitr::kable()
 
 The RMSE values of all the represented models are the following:
 
-```{r rmse_results3, echo = FALSE}
+```
 rmse_results %>% knitr::kable()
 ```
 
-We therefore found the lowest value of RMSE that is 0.8652226.
+We therefore found the lowest value of RMSE that is 0.8648170.
 
 
 # Discussion
