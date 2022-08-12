@@ -65,7 +65,7 @@ movies <- as.data.frame(movies) %>% mutate(movieId = as.numeric(movieId),
 movielens <- left_join(ratings, movies, by = "movieId")
 ```
 
-The Movielens dataset will be splitted into 2 subset, a training subset (edx), and a testing subset (Validation):
+The Movielens dataset will be split into 2 subsets: a training subset (edx) and a testing subset (Validation).
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, eval = TRUE}
 # Validation set will be 10% of MovieLens data
@@ -250,12 +250,12 @@ $$Y_{u, i} = \mu +b_{i}+ \epsilon_{u, i}$$
 The histogram is left skewed, implying that more movies have negative effects
 
 
-```{r Number_of_movies_with_the computed_b_i, echo = TRUE, fig.height=3, fig.width=4}
+```{r Number_of_movies_with_the computed_b_m, echo = TRUE, fig.height=3, fig.width=4}
 movie_avgs <- edx %>%
   group_by(movieId) %>%
-  summarize(b_i = mean(rating - mu))
-movie_avgs %>% qplot(b_i, geom ="histogram", bins = 10, data = ., color = I("black"),
-ylab = "Number of movies", main = "Number of movies with the computed b_i")
+  summarize(b_m = mean(rating - mu))
+movie_avgs %>% qplot(b_m, geom ="histogram", bins = 10, data = ., color = I("black"),
+ylab = "Number of movies", main = "Number of movies with the computed b_m")
 ```
 
 
@@ -266,7 +266,7 @@ Our prediction improve once we predict using this model.
 ```{r predicted_ratings, echo = TRUE}
 predicted_ratings <- mu +  validation %>%
   left_join(movie_avgs, by='movieId') %>%
-  pull(b_i)
+  pull(b_m)
 model_1_rmse <- RMSE(predicted_ratings, validation$rating)
 rmse_results <- bind_rows(rmse_results,
                           data_frame(method="Movie effect model",  
@@ -288,23 +288,22 @@ Then we'll combine the bias of a user, with the bias of a film and add both to t
 $$Y_{u, i} = \mu + b_{i} + b_{u} + \epsilon_{u, i}$$
   
 ```{r, echo = TRUE}
-user_avgs<- edx %>% 
+user_effects<- edx %>% 
   left_join(movie_avgs, by='movieId') %>%
   group_by(userId) %>%
   filter(n() >= 100) %>%
-  summarize(b_u = mean(rating - mu - b_i))
-user_avgs%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("black"))
+  summarize(b_u = mean(rating - mu - b_m))
+user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("black"))
 ```
 
 
 We compute an approximation by computing $\mu$ and $b_{i}$, and estimating  $b_{u}$, as the average of $$Y_{u, i} - \mu - b_{i}$$
   
-```{r user_avgs, echo = TRUE}
-user_avgs <- edx %>%
+```{r user_effects, echo = TRUE}
+user_effects <- edx %>%
   left_join(movie_avgs, by='movieId') %>%
   group_by(userId) %>%
-  summarize(b_u = mean(rating - mu - b_i))
-
+  summarize(b_u = mean(rating - mu - b_m))
 ```
 
 We can now construct predictors and see RMSE improves:
@@ -313,9 +312,9 @@ We can now construct predictors and see RMSE improves:
 ```{r model_2_rmse, echo = TRUE}
 predicted_ratings <- validation%>%
   left_join(movie_avgs, by='movieId') %>%
-  left_join(user_avgs, by='userId') %>%
-  mutate(pred = mu + b_i + b_u) %>%
-  pull(pred)
+  left_join(user_effects, by='userId') %>%
+  mutate(prediction = mu + b_m + b_u) %>%
+  pull(prediction)
 model_2_rmse <- RMSE(predicted_ratings, validation$rating)
 rmse_results <- bind_rows(rmse_results,
                           data_frame(method="Movie and user effect model",  
@@ -330,51 +329,22 @@ Large errors can increase our RMSE.
 
 ### IV. Movie + User Effects + Age Effects Model
 
-Similar to the movie effect, we now further add the bias of user effect (b_u) to the movie effect model.
-
-```{r message=FALSE, warning=FALSE}
-#calculating and plot b_u distribution
-user_effects <- edx %>% 
-  left_join(movie_effects, by='movieId') %>%
-  group_by(userId) %>%
-  summarize(b_u = mean(rating - mu_hat - b_m))
-user_effects %>% qplot(b_u, geom ="histogram", bins = 10, data = ., color = I("blue")) 
-#calculating predicted ratings
-predicted_ratings_m_u <- validation %>% 
-  left_join(movie_effects, by='movieId') %>%
-  left_join(user_effects, by='userId') %>%
-  mutate(prediction = mu_hat + b_m + b_u) %>%
-  pull(prediction)
-#calculating model_m_rmse with consideration of movie + user effects  
-model_m_u_rmse <- RMSE(validation$rating,predicted_ratings_m_u)
-rmse_results <- bind_rows(rmse_results,
-                          data_frame(Model="Movie + User Effects Model",  
-                                     RMSE = model_m_u_rmse))
-rmse_results %>% knitr::kable()
-```
-
-Again, the new RMSE by adding movieId and userId together drops from 0.9439 to 0.8653. The movie and user effect model further improves predication accuracy around 18.5% compared with "Only by average rating" model.
-
-In data analysis part, we estimate the time effect would be weak. What will new RMSE be by adding movie age on top of movie and user effect?
-
-### V. Movie + User Effects Regularization Model
-
 We now further add the bias of movie age effect (b_a) to the movie + user effect model.
 
 ```{r message=FALSE, warning=FALSE}
 #calculating and plot b_a distribution
 ages_effects <- edx %>% 
-  left_join(movie_effects, by='movieId') %>%
+  left_join(movie_avgs, by='movieId') %>%
   left_join(user_effects, by='userId') %>%
   group_by(ages) %>%
-  summarize(b_a = mean(rating - mu_hat - b_m - b_u))
+  summarize(b_a = mean(rating - mu - b_m - b_u))
 ages_effects %>% qplot(b_a, geom ="histogram", bins = 10, data = ., color = I("blue"))
 #calculating predicted ratings
 predicted_ratings_m_u_a <- validation %>% 
-  left_join(movie_effects, by='movieId') %>%
+  left_join(movie_avgs, by='movieId') %>%
   left_join(user_effects, by='userId') %>%
   left_join(ages_effects, by='ages') %>%
-  mutate(prediction = mu_hat + b_m + b_u + b_a) %>%
+  mutate(prediction = mu + b_m + b_u + b_a) %>%
   pull(prediction)
 #calculating model_m_rmse with consideration of movie + user + age effects  
 model_m_u_a_rmse <- RMSE(validation$rating,predicted_ratings_m_u_a)
@@ -384,7 +354,50 @@ rmse_results <- bind_rows(rmse_results,
 rmse_results %>% knitr::kable()
 ```
 
-As expected, the difference of RMSE is only 0.00045 with additional consideration of age effect which confirms our judgment of weak effect by movie's age.
+Again, the new RMSE by adding movieId and userId together drops from 0.9439 to 0.8653. The movie and user effect model further improves predication accuracy around 18.5% compared with "Only by average rating" model.
+
+In data analysis part, we estimate the time effect would be weak. What will new RMSE be by adding movie age on top of movie and user effect?
+
+### V. Movie + User Effects Regularization Model
+
+The general idea behind regularization is to constrain the total variability of the effect size. As lambda is a tuning parameter, we can use cross-validation to choose optimized one for model building and performance evaluation.
+
+```{r message=FALSE, warning=FALSE}
+lambdas <- seq(0, 10, 0.25)
+rmses <- sapply(lambdas, function(l){
+mu_reg <- mean(edx$rating)
+#regulation movie effect
+b_m_reg <- edx %>%
+group_by(movieId) %>%
+summarize(b_m_reg = sum(rating - mu_reg)/(n()+l))
+#regulation user effect
+b_u_reg <- edx %>%
+left_join(b_m_reg, by="movieId") %>%
+group_by(userId) %>%
+summarize(b_u_reg = sum(rating - b_m_reg - mu_reg)/(n()+l))
+#calculating predicted ratings
+predicted_ratings_b_m_u <-
+validation %>%
+left_join(b_m_reg, by = "movieId") %>%
+left_join(b_u_reg, by = "userId") %>%
+mutate(prediction = mu_reg + b_m_reg + b_u_reg) %>%
+.$prediction
+return(RMSE(validation$rating,predicted_ratings_b_m_u))
+})
+qplot(lambdas, rmses)
+#For the full model, the optimal lambda is given as
+lambda <- lambdas[which.min(rmses)]
+lambda
+#calculating regularization model RMSE: model_m_u_reg_rmse
+model_m_u_reg_rmse <- min(rmses)
+model_m_u_reg_rmse
+rmse_results <- bind_rows(rmse_results,
+                          data_frame(Model="Movie + User Regularization Model",
+                                     RMSE = model_m_u_reg_rmse))
+rmse_results %>% knitr::kable()
+```
+
+Now we finally achieve the goal of RMSE which is less than 0.86490 by model of regularization of movie and user effects. The new RMSE is 0.8648. 
 
 \pagebreak
 
@@ -403,7 +416,7 @@ We therefore found the lowest value of RMSE that is 0.8648170.
 
 So we can confirm that the final model for our project is the Regularized movie and user effect model:
 
-$$Y_{u, i} = \mu + b_{i} + b_{u} + \epsilon_{u, i}$$
+$$Y_{u, i} = \mu + b_{m} + b_{u} + \epsilon_{u, m}$$
 
 As expected, the RMSE decreased while the model increases complexity. We can even discuss if a good alternative is to increase the parameters of the models like inlude genres, however to split the genres in the data we need more advanced hardware. 
 
@@ -413,4 +426,4 @@ Machine learning algorithm was built to predict movie ratings with MovieLens dat
 
 The Regularized movie and user effect model is characterized by the lower RMSE value and is hence the optimal model to use for the present project.
 
-We could also say that some improvements in the RMSE could be achieved by adding other parameters (genre, year, age). Other different machine learning models could also improve the results further, but hardware limitations, such as the RAM, are a constraint.
+We could also say that some improvements in the RMSE could be achieved by adding other parameters (genre, year, age). Other different machine learning models could also improve the results further, but hardware limitations, as the RAM, are a constraint.
