@@ -1,7 +1,7 @@
 ---
 title: "MovieLens Capstone Project"
 author: "Justin Oh"
-date: "08/08/2022"
+date: "08/12/2022"
 output: pdf_document
 ---
   
@@ -326,39 +326,7 @@ rmse_results %>% knitr::kable()
 Our rating predictions further reduced the RMSE. But we made stil mistakes on our first model (using only movies). The supposes “best “ and “worst “movie were rated by few users, in most cases just one user. These movies were mostly obscure ones. This is because with a few users, we have more uncertainty. Therefore larger estimates of $b_{i}$, negative or positive, are more likely.
 Large errors can increase our RMSE. 
 
-
-### IV. Movie + User Effects + Age Effects Model
-
-We now further add the bias of movie age effect (b_a) to the movie + user effect model.
-
-```{r message=FALSE, warning=FALSE}
-#calculating and plot b_a distribution
-ages_effects <- edx %>% 
-  left_join(movie_avgs, by='movieId') %>%
-  left_join(user_effects, by='userId') %>%
-  group_by(ages) %>%
-  summarize(b_a = mean(rating - mu - b_m - b_u))
-ages_effects %>% qplot(b_a, geom ="histogram", bins = 10, data = ., color = I("blue"))
-#calculating predicted ratings
-predicted_ratings_m_u_a <- validation %>% 
-  left_join(movie_avgs, by='movieId') %>%
-  left_join(user_effects, by='userId') %>%
-  left_join(ages_effects, by='ages') %>%
-  mutate(prediction = mu + b_m + b_u + b_a) %>%
-  pull(prediction)
-#calculating model_m_rmse with consideration of movie + user + age effects  
-model_m_u_a_rmse <- RMSE(validation$rating,predicted_ratings_m_u_a)
-rmse_results <- bind_rows(rmse_results,
-                          data_frame(Model="Movie + User + Age Effects Model",
-                                     RMSE = model_m_u_a_rmse))
-rmse_results %>% knitr::kable()
-```
-
-Again, the new RMSE by adding movieId and userId together drops from 0.9439 to 0.8653. The movie and user effect model further improves predication accuracy around 18.5% compared with "Only by average rating" model.
-
-In data analysis part, we estimate the time effect would be weak. What will new RMSE be by adding movie age on top of movie and user effect?
-
-### V. Movie + User Effects Regularization Model
+### IV. Movie + User Effects Regularization Model
 
 The general idea behind regularization is to constrain the total variability of the effect size. As lambda is a tuning parameter, we can use cross-validation to choose optimized one for model building and performance evaluation.
 
@@ -392,7 +360,7 @@ lambda
 model_m_u_reg_rmse <- min(rmses)
 model_m_u_reg_rmse
 rmse_results <- bind_rows(rmse_results,
-                          data_frame(Model="Movie + User Regularization Model",
+                          data_frame(method="Movie + User Regularization Model",
                                      RMSE = model_m_u_reg_rmse))
 rmse_results %>% knitr::kable()
 ```
