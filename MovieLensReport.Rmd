@@ -5,7 +5,7 @@ date: "08/12/2022"
 output: pdf_document
 ---
 
-## Introduction
+# Introduction
 
 Netflix, currently the most popular streaming service in the world, launched a competition in 2006 promising $1 million in prize money for the winning team. The objective of the challenge was to create an algorithm that outperformed Netflix's baseline algorithm, Cinematch, by 10%. The "Netflix Prize" contest highlighted the significance and financial benefits of research focused on improving existing recommendation systems, with companies such as social media firm Twitter hosting similar competitions of their own.
 
@@ -378,7 +378,7 @@ rmse_results %>% knitr::kable()
 We therefore found the lowest value of RMSE that is 0.8648170.
 
 
-# Discussion
+## Discussion
 
 So we can confirm that the final model for our project is the Regularized movie and user effect model:
 
@@ -388,8 +388,42 @@ As expected, the RMSE decreased while the model increases complexity. We can eve
 
 # Conclusion
 
+In order to construct a movie recommendation algorithm with a sufficiently low RMSE, I employed an iterative applied machine learning approach. Beginning with naive approaches, I developed models that branched out to other features such as movie and user effects, and applied the regularization technique to further cut down the RMSE value.
+
+Considering the fact that only two predictors, "movieId" and "userId", were used to obtain the desired RMSE value, there is far more potential that can be realized through the incorporation of other predictors such as "genres" and "releaseYear".
+
+We could also see drastic RMSE reduction with the use of a larger dataset. The MovieLens 10M dataset could be swapped for the 25M dataset offered on the 
+
+
+ dataset size and the computing power of the machine are the two most difficult obstacles we can run across while putting those extra models into use and continuing with the overall improvements.
+
+In this project, we have used an iterative applied machine learning approach to implement a movie recommendation system to predict a movie rating by a given user. We have build, train and validate naive approach, movie effects, user effects and tuned the models using regularisation technique to predict the movie ratings by users with a targeted RMSE.
+
+As we have seen the Exploratory Data Analysis, the MovieLens dataset contains some other features that we could use as predictors like `genres`, `releaseYear (from title)` and `ratingYear (from timestamp)`.
+
+We could also build and train other models such as KNN, Matrix Factorization, and PCA. Some of these algorithms could improve the RMSEs, others could improve the Accuracy.
+
+The most challenging impediment that we might encounter when implementing those additional models and going further in the overall optimizations are both the dataset size and the machine computation resources.
+
 Machine learning algorithm was built to predict movie ratings with MovieLens dataset.
 
 The Regularized movie and user effect model is characterized by the lower RMSE value and is hence the optimal model to use for the present project.
 
 We could also say that some improvements in the RMSE could be achieved by adding other parameters (genre, year, age). Other different machine learning models could also improve the results further, but hardware limitations, as the RAM, are a constraint.
+
+### Limitations
+
+My MovieLens Project encounter several limitations that I hope to address in the future, perhaps through the assistance of my peers. 
+
+The training and modeling are perform on a laptop that has limited memory and processing powers. I have attempted to evaluate k-NN models, but all of them failed due to hardware limitation. 
+
+According to MovieLens website, the are fews modeling that manage to achieve RMSE less than 0.7. Most of these modeling are performed on specialize program.
+
+This limitation can be overcome with more details exploration and research.
+
+## 5.3 Future Works
+More research, analysis, and training of models are needed to get the best result in predicting user-movie rating from MovieLens dataset. Following modeling techniques warrants further studies to improve the overall accuracy, 
+
+1. Collaborative filter with recommenderlab package,
+2. k-NN collaborative filtering algorithm,
+3. Collaborative filtering & matrix factorization with rrecsys package.
