@@ -4,39 +4,37 @@ author: "Justin Oh"
 date: "08/12/2022"
 output: pdf_document
 ---
-  
-# Overview
-  
-  This project is related to the MovieLens Project of the HarvardX: PH125.9x Data Science: Capstone course. The present report start with a general idea of the project and by representing its objective.
-
-Then the given dataset will be prepared and setup. An exploratory data analysis is carried out in order to develop a machine learning algorithm that could predict movie ratings until a final model. Results will be explained. Finally the report ends with some concluding remarks.
-
 
 ## Introduction
 
-Statistical and knowledge discovery techniques are applied to the problem of producing product recommendations or ratings through recommmender systems and on the basis of previously recorded data. In the present report, the products are the movies.
+Netflix, currently the most popular streaming service in the world, launched a competition in 2006 promising $1 million in prize money for the winning team. The objective of the challenge was to create an algorithm that outperformed Netflix's baseline algorithm, Cinematch, by 10%. The "Netflix Prize" contest highlighted the significance and financial benefits of research focused on improving existing recommendation systems, with companies such as social media firm Twitter hosting similar competitions of their own.
 
-The present report covers the 10M version of the movieLens dataset available here <https://grouplens.org/datasets/movielens/10m/>.
-
-The Netflix prize (i.e. challenge to improve the predictions of Netfix's movie recommender system by above 10% in terms of the root mean square error) reflects the importance and economic impact of research in the recommendation systems field. 
+In the HarvardX: PH125.9x Data Science: Capstone course, an objective comparable to the "Netflix Prize" contest is presented to participants, albeit with the use of a different dataset. Rather than the datasets provided by Netflix, the 10M version of the MovieLens dataset provided by the research lab GroupLens will be used. As the name suggests, the dataset contains 10 million movie ratings, as well as 100,000 tag applications applied to 10,000 movies by 72,000 users.
 
 
-## Aim of the project
+## Goal of the Project
 
-The goal is to train a machine learning algorithm using the inputs of a provided training subset to predict movie ratings in a validation set.
-The predicted user ratings will be in the range from 0.5 to 5.
+The MovieLens Project is designed to encompass the various machine learning and computational concepts learned from previous courses in the HarvardX Professional Data Science Certificate program. Using the MovieLens dataset provided, the goal of the project is to train an algorithm with a RMSE score less than 0.86490.
 
-The value used to evaluate the algorithm performance is the Root Mean Square Error, or RMSE. (Low RMSE -> Better Performance)
+The Root Mean Square Error, or RMSE, is the value used to assess the algorithm's performance. Generally, a lower RMSE score indicates better performance, and vice versa. 
 
-The function that computes the RMSE for vectors of ratings and their corresponding predictors will be the following:
+The following function computes the RMSE based on predicted and observed values:
 $$ RMSE = \sqrt{\frac{1}{N}\displaystyle\sum_{u,i} (\hat{y}_{u,i}-y_{u,i})^{2}} $$
 
-Finally, the best resulting model will be used to predict the movie ratings.
+
+## Key Steps Performed
+
+The MovieLens Project consisted of four key stages, and as such, the report has been divided into four distinct sections for improved readability.
+
+1) Introduction: The context needed to understand the MovieLens Project is provided such as the definition of RMSE. Proceeded to download the MovieLens 10M dataset and created the "edx" and "valiation" subsets, which will serve as the training dataset and final hold-out test dataset, respectively.
+2) Methods/Analysis: Performed exploratory analysis using the MovieLens dataset to clarify the influence that each feature has on movie ratings.
+3) Results: Created multiple models that incorporate varying features of the MovieLens dataset while presenting the code associated. Upon doing so, the RMSE value of each model was calculated in search of the best performing algorithm. 
+4) Conclusion: Provided a brief summary of my MovieLens Project as a whole, as well as conclusions that could be made hrough the results from the models created. Limitations specific to my project are elaborated on and future work is discussed for closure. 
 
 
-## Dataset
+## Overview of Provided Code
 
-Code provided by edx staff to download an create edx dataset:
+Below is the code provided by HarvardX:
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, eval = TRUE}
 ##########################################################
@@ -65,7 +63,7 @@ movies <- as.data.frame(movies) %>% mutate(movieId = as.numeric(movieId),
 movielens <- left_join(ratings, movies, by = "movieId")
 ```
 
-The Movielens dataset will be split into 2 subsets: a training subset (edx) and a testing subset (Validation).
+As mentioned previously, the MovieLens dataset will be split into 2 subsets: a training subset (edX) and a testing subset (Validation).
 
 ```{r, echo = TRUE, message = FALSE, warning = FALSE, eval = TRUE}
 # Validation set will be 10% of MovieLens data
