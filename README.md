@@ -6,9 +6,9 @@ The submission for the MovieLens project will be three files: a report in the fo
 
 # b. Contents of the Repository
 As the instructions necessitate, the following three files are attached: <br />
-1. MovieLensReport.Rmd <br />
-2. MovieLensReport.pdf <br />
-3. MovieLensRScript <br />
+1. JOMovieLensFinal.R <br />
+2. JOMovieLensFinal.Rmd <br />
+3. JOMovieLensFinal.pdf <br />
 
 # c. Timeline of Project
 6/23/22 - Start Date <br />
