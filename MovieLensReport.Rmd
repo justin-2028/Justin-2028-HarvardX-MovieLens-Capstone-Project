@@ -81,13 +81,90 @@ edx <- rbind(edx, removed)
 rm(dl, ratings, movies, test_index, temp, movielens, removed)
 ```
 
+## Examining the Data
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+# Load extra libraries for data analysis and visualization
+if(!require(dslabs)) install.packages("dslabs", repos = "http://cran.us.r-project.org")
+if(!require(ggplot2)) install.packages("ggplot2", repos = "http://cran.us.r-project.org")
+if(!require(lubridate)) install.packages("lubridate", repos = "http://cran.us.r-project.org")
+library(dslabs)
+library(ggplot2)
+library(lubridate)
+```
+
+After the data is loaded, we start the work by examining the data structure, data classifications and corresponding statistics of data set for better understanding of source data.
+
+First check whether there is any missing value in data sets "edx" and "validation".
+
+```{r message=FALSE, warning=FALSE}
+#check any missing value in training data set "edx"
+anyNA(edx)
+#check any missing value in final hold-out test data set "validation"
+anyNA(validation)
+#list amount of observations and variables in training data set "edx"
+dim(edx)
+#list amount of observations and variables in final hold-out test data set "validation"
+dim(validation)
+```
+
+The results of above checking indicate that no invalid or missing value in both data set "edx" and "validation". We observe that there are total 9,000,055 observations with 6 features in "edx" data set and 999,999 observations with 6 features in "validation" data set. Now we need to know what features are they and statistics of them.
+
+Now we further explore the data set "edx" to know more about it.
+
+Here are first 6 observations of data set "edx" for us to have preliminary view.
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+head(edx)
+```
+
+Here is statistics of data set "edx".
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+summary(edx)
+```
+
+Now we know data set "edx" has initially 6 features of "userId", "movieId", "rating", "timestamp", "title" and "genres". Meanwhile, We notice that there is year information in the feature "title" which may need to be split for further analysis. Also, we may need to convert "timestamp" to rated year for further checking the time effect on rating. Moveover we notice that there are several types in feature "genres" for one single observation. We may need to split "genres" for better handling the genres effect on rating in upcoming data processing part. Now we know the average rating is 3.512 and minimum rating is 0.5.
+
+##    Data Preprocessing
+Before we look into more detailed data analysis, we will conduct minor data pre-processing on both "edx" and "validation" data sets. The data pre-processing tasks include converting feature "timestamp" to year rated, extracting year released from feature "title", calculating ages between year rated and year released and adding these 3 new features to original data sets.
+
+```{r message=FALSE, warning=FALSE}
+# convert timestamp to year rated and add it to edx
+edx <- edx %>% mutate(year_rated = year(as_datetime(timestamp)))
+# double check any invalid value after convertion of timestamp
+unique(edx$year_rated)
+# extract the year released from title and add it to edx
+edx <- edx %>% mutate(year_released = as.numeric(str_sub(title,-5,-2)))
+# double check any invalid value of year released
+unique(edx$year_released)
+# calculate the movie age when movie was rated and add it to edx
+edx <- edx %>% mutate(ages = as.numeric(year_rated)-as.numeric(year_released))
+# double check any invalid value of ages
+unique(edx$ages)
+```
+We can see the result of data pre-processing is good except that 2 odd values of ages (-1 and -2) are observed. We are not sure whether the movies were rated before they were final released or they were just some data errors. Anyway, we plan to further check how much portion of observations with these odd values. 
+
+```{r message=FALSE, warning=FALSE}
+sum(edx$ages == -1)/nrow(edx)
+sum(edx$ages == -2)/nrow(edx)
+```
+
+Now we know the portion of observations with odd values is quite small so it would not have big impact on our modeling and predication. Hence we just leave them as they are. 
+
+Now we apply the same data pre-processing on data set "validation" too.
+
+```{r message=FALSE, warning=FALSE}
+# do the same data pre-processing for validation set
+validation <- validation %>% mutate(year_rated = year(as_datetime(timestamp)))
+validation <- validation %>% mutate(year_released = as.numeric(str_sub(title,-5,-2)))
+validation <- validation %>% mutate(ages = as.numeric(year_rated)-as.numeric(year_released))
+```
 
 # Methods and Analysis
 
 
 ## Data Analysis
 
-The edx subset contains  six variables “userID”, “movieID”, “rating”, “timestamp”, “title”, and “genres”. Each row represent a single rating of a user for a single movie.
+Six variables — "userID," "movieID," "rating," "timestamp," "title," and "genres" — are included in the edx subset. Each row corresponds to a single user's rating of a particular movie.
 
 ```{r head, echo = FALSE}
 head(edx) %>%
@@ -114,7 +191,7 @@ We can see, in the figure below, that the rating distribution has a left-skewed 
 ```{r rating_distribution, echo = FALSE}
 edx %>%
   ggplot(aes(rating)) +
-  geom_histogram(binwidth = 0.25, color = "black") +
+  geom_histogram(binwidth = 0.25, color = "blue3") +
   scale_x_discrete(limits = c(seq(0.5,5,0.5))) +
   scale_y_continuous(breaks = c(seq(0, 3000000, 500000))) +
   ggtitle("Rating distribution")
@@ -128,7 +205,7 @@ We can plot the data and determine that some movies are rated more often than ot
 edx %>%
 count(movieId) %>%
 ggplot(aes(n)) +
-geom_histogram(bins = 30, color = "black") +
+geom_histogram(bins = 30, color = "blue3") +
 scale_x_log10() +
 xlab("Number of ratings") +
   ylab("Number of movies") +
@@ -160,7 +237,7 @@ The majority of users have rated below 100 movies, but also above 30 movies (a u
 edx %>%
 count(userId) %>%
 ggplot(aes(n)) +
-geom_histogram(bins = 30, color = "black") +
+geom_histogram(bins = 30, color = "blue3") +
 scale_x_log10() +
 xlab("Number of ratings") + 
 ylab("Number of users") +
@@ -177,7 +254,7 @@ edx %>%
   filter(n() >= 100) %>%
   summarize(b_u = mean(rating)) %>%
   ggplot(aes(b_u)) +
-  geom_histogram(bins = 30, color = "black") +
+  geom_histogram(bins = 30, color = "blue3") +
   xlab("Mean rating") +
   ylab("Number of users") +
   ggtitle("Mean movie ratings given by users") +
@@ -252,7 +329,7 @@ The histogram is left skewed, implying that more movies have negative effects
 movie_avgs <- edx %>%
   group_by(movieId) %>%
   summarize(b_m = mean(rating - mu))
-movie_avgs %>% qplot(b_m, geom ="histogram", bins = 10, data = ., color = I("black"),
+movie_avgs %>% qplot(b_m, geom ="histogram", bins = 10, data = ., color = I("blue3"),
 ylab = "Number of movies", main = "Number of movies with the computed b_m")
 ```
 
@@ -291,7 +368,7 @@ user_effects<- edx %>%
   group_by(userId) %>%
   filter(n() >= 100) %>%
   summarize(b_u = mean(rating - mu - b_m))
-user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("black"))
+user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("blue3"))
 ```
 
 
