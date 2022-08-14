@@ -93,9 +93,9 @@ library(ggplot2)
 library(lubridate)
 ```
 
-After the data is loaded, we start the work by examining the data structure, data classifications and corresponding statistics of data set for better understanding of source data.
+After the data is loaded, we will examine the structure, classifications and corresponding statistics of our data set for better understanding of the source data.
 
-First check whether there is any missing value in data sets "edx" and "validation".
+We will first check to see whether there are any missing values both the "edx" and "validation" subsets.
 
 ```{r message=FALSE, warning=FALSE}
 #check any missing value in training data set "edx"
@@ -108,11 +108,12 @@ dim(edx)
 dim(validation)
 ```
 
-The results of above checking indicate that no invalid or missing value in both data set "edx" and "validation". We observe that there are total 9,000,055 observations with 6 features in "edx" data set and 999,999 observations with 6 features in "validation" data set. Now we need to know what features are they and statistics of them.
+The results above show that neither the data set "edx" nor the "validation" include any incorrect or missing values. We can see that the "edx" data set has a total of 9,000,055 observations with 6 features, whereas the "validation" data set contains 999,999 observations with 6 features. We now need to be aware of their various statistics and distinguishable qualities.
 
-Now we further explore the data set "edx" to know more about it.
+To learn more about the data set "edx," we are now exploring it further.
 
-Here are first 6 observations of data set "edx" for us to have preliminary view.
+Here are the first six observations from the data set "edx" so that we can get a quick overview.
+
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 head(edx)
 ```
@@ -122,10 +123,10 @@ Here is statistics of data set "edx".
 summary(edx)
 ```
 
-Now we know data set "edx" has initially 6 features of "userId", "movieId", "rating", "timestamp", "title" and "genres". Meanwhile, We notice that there is year information in the feature "title" which may need to be split for further analysis. Also, we may need to convert "timestamp" to rated year for further checking the time effect on rating. Moveover we notice that there are several types in feature "genres" for one single observation. We may need to split "genres" for better handling the genres effect on rating in upcoming data processing part. Now we know the average rating is 3.512 and minimum rating is 0.5.
+As of right now, we are aware that the data set "edx" initially included six features: "userId," "movieId," "rating," "timestamp," "title," and "genres." In the meanwhile, we note that the feature's "title" contains year information; this information may need to be divided for additional analysis. Additionally, in order to further examine the impact of time on rating, "timestamp" may need to be converted to rated year. Moving on, we see that there are several "genres" of feature types for a single observation. To handle the impact of genres on ratings in the next data processing portion, we might need to divide "genres." We now know that the minimum rating is 0.5 and the average rating is 3.512.
 
 ##    Data Preprocessing
-Before we look into more detailed data analysis, we will conduct minor data pre-processing on both "edx" and "validation" data sets. The data pre-processing tasks include converting feature "timestamp" to year rated, extracting year released from feature "title", calculating ages between year rated and year released and adding these 3 new features to original data sets.
+We will perform some minimal data pre-processing on both the "edx" and "validation" data sets before we go into further in-depth data analysis. As part of the data pre-processing steps, the feature "timestamp" is converted to the year rated, the year released is extracted from the feature "title", the age between the year rated and year released is calculated, and all 3 new features are added to the original data sets.
 
 ```{r message=FALSE, warning=FALSE}
 # convert timestamp to year rated and add it to edx
@@ -141,16 +142,16 @@ edx <- edx %>% mutate(ages = as.numeric(year_rated)-as.numeric(year_released))
 # double check any invalid value of ages
 unique(edx$ages)
 ```
-We can see the result of data pre-processing is good except that 2 odd values of ages (-1 and -2) are observed. We are not sure whether the movies were rated before they were final released or they were just some data errors. Anyway, we plan to further check how much portion of observations with these odd values. 
+We can see that the pre-processing of the data produced decent results with the exception of the observation of 2 odd ages (-1 and -2). We're not sure if the movies were rated before they were officially released or if there were data issues. We need to further investigate the observations that have these peculiar values.
 
 ```{r message=FALSE, warning=FALSE}
 sum(edx$ages == -1)/nrow(edx)
 sum(edx$ages == -2)/nrow(edx)
 ```
 
-Now we know the portion of observations with odd values is quite small so it would not have big impact on our modeling and predication. Hence we just leave them as they are. 
+The number of observations with odd values are not significant enough to influence modeling to a concerning degree, so we will keep these values for now. 
 
-Now we apply the same data pre-processing on data set "validation" too.
+We will apply the same process on the "validation" dataset as well.
 
 ```{r message=FALSE, warning=FALSE}
 # do the same data pre-processing for validation set
@@ -172,13 +173,13 @@ head(edx) %>%
   
 ```
 
-We can summarize the edx subset to confirm that there are no missing values.
+Using the summarize function, we can check the edx subset for any missing values.
 
 ```{r summary, echo = FALSE}
 summary(edx)
 ```
 
-The number of unique movies and users in the edx subset:
+We can also calculate the number of unique movies and users in the edx subset:
 
 ```{r, echo = FALSE}
 edx %>%
@@ -186,7 +187,7 @@ summarize(n_users = n_distinct(userId),
           n_movies = n_distinct(movieId))
 ```
 
-We can see, in the figure below, that the rating distribution has a left-skewed distribution. Users have a preference to rate movies rather higher than lower. The rating 4 is the most common rating, followed by 3 and 5.
+The figure below visually illustrates the left-skewed distribution of the rating scale. Users prefer to give movies better ratings than lower ones. The most prevalent rating is 4, followed by 3 and 5.
 
 ```{r rating_distribution, echo = FALSE}
 edx %>%
@@ -199,7 +200,7 @@ edx %>%
 ```
 
 
-We can plot the data and determine that some movies are rated more often than others, while some have very few  ratings and sometimes only one rating. Thus regularization and a penalty term will be applied to the models in this report.
+We can visualize the data and see that some films receive ratings more frequently than others, while other films receive extremely few or even no ratings at all. The models in this report will be subjected to regularization and a penalty term as a result.
 
 ```{r number_of_ratings_per_movie, echo = TRUE, fig.height=4, fig.width=5}
 edx %>%
@@ -213,8 +214,7 @@ ggtitle("Number of ratings per movie")
 ```
 
 
-As 20 movies that were rated only once appear to be obscure, predictions of future ratings for them will be difficult.
-
+It will be challenging to anticipate future ratings for the 20 films that have only received one rating given their obscurity.
 
 ```{r obscure_movies, echo = TRUE, fig.height=4, fig.width=5}
 edx %>%
@@ -230,8 +230,7 @@ edx %>%
 ```
 
 
-The majority of users have rated below 100 movies, but also above 30 movies (a user penalty term will be included in the models).
-
+The vast majority of people have given between 30 to 100 movie ratings, and as a result, a user penalty term will be included in the models.
 
 ```{r number_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
 edx %>%
@@ -244,9 +243,7 @@ ylab("Number of users") +
 ggtitle("Number of ratings given by users")
 ```
 
-
-Furthermore, users differ vastly in how critical they are with their ratings. Some users tend to give much lower star ratings and some users tend to give higher star ratings than average. The visualization below includes only users that have rated at least 100 movies.
-
+As we can see, the degree to which people are critical of a movie (which is reflected in their rating) also varies greatly. Some people have a tendency to rate items with far less stars than the typical user, and vice versa. Only users with at least 100 movie ratings are shown in the following graphic below.
 
 ```{r Mean_movie_ratings_given_by_users, echo = TRUE, fig.height=4, fig.width=5}
 edx %>%
@@ -271,10 +268,10 @@ We write function, previously anticipated, that compute the RMSE, defined as fol
 $$ RMSE = \sqrt{\frac{1}{N}\displaystyle\sum_{u,i} (\hat{y}_{u,i}-y_{u,i})^{2}} $$
 
 
-With N being the number of user/movie combinations and the sum occurring over all these combinations.
-The RMSE is our measure of model accuracy.
+N represents the number of user/movie combinations and the sum occurring over all these combinations.
+Our metric for model precision is the RMSE.
 
-The written function to compute the RMSE for vectors of ratings and their corresponding predictions is:
+The following written function computes the RMSE through the vectors of ratings and their corresponding predictions:
 
 ```{r RMSE_function2, echo = TRUE}
 RMSE <- function(true_ratings, predicted_ratings){
@@ -282,24 +279,23 @@ RMSE <- function(true_ratings, predicted_ratings){
 }
 ```
 
-The quality of the model will be assessed by the RMSE (the lower the better).
+The RMSE will judge the model's level of quality. As mentioned before, a lower RMSE score indicates better results.
 
+### 1) Naive Model
 
-### I. Naive Model
+We will develop a prediction system that just makes use of the sample mean. This suggests that each prediction is the sample average.
 
-Creating a prediction system that only utilizes the sample mean. This implies that every prediction is the sample average. 
-
-This is a model based approach which assumes the same rating for all movie with all differences explained by random variation :
+This model-based approacb assumes that all movies will receive the same rating and that any discrepancies will be due to random variation:
 $$ Y_{u, i} = \mu + \epsilon_{u, i} $$
-with $\epsilon_{u,i}$ independent error sample from the same distribution centered at 0 and $\mu$ the “true” rating for all movies. This very simple model makes the assumption that all differences in movie ratings are explained by random variation alone. We know that the estimate that minimize the RMSE is the least square estimate of $Y_{u,i}$ , in this case, is the average of all ratings:
+with $\epsilon_{u,i}$ independent error sample from the same distribution centered at 0 and $\mu$ the “true” rating for all movies. This very simple model makes the assumption that all differences in movie ratings are explained by random variation alone. We know that the estimate that minimizes the RMSE is the least square estimate of $Y_{u,i}$ , which is the average of all ratings:
 
 ```{r, echo = TRUE}
 mu <- mean(edx$rating)
 mu
 ```
 
-Getting the first naive RMSE:
-The  resulting RMSE using this approach is quite high.
+Here, we solve for the first naive RMSE.
+The  resulting RMSE using this approach is higher than we would like.
 
 ```{r naive_rmse, echo = TRUE}
 naive_rmse <- RMSE(validation$rating, mu)
@@ -313,16 +309,16 @@ rmse_results <- data_frame(method = "Naive model", RMSE = naive_rmse)
 rmse_results %>% knitr::kable()
 ```
 
-This give us our baseline RMSE to compare with next modelling approaches.
+While this is far higher than the 0.86490 RMSE objective, this provides us with our baseline RMSE for comparison with future modeling strategies.
 
-### II.  Movie Effect Model
+### 2) Movie Effect Model
 
-Higher ratings are mostly linked to popular movies among users and the opposite is true for unpopular movies. 
+Popular movies typically receive higher ratings from people, whereas unpopular movies typically receive lower ratings.
 
-We compute the estimated deviation of each movies’ mean rating from the total mean of all movies $\mu$. The resulting variable is called "b" ( as bias ) for each movie "i" $b_{i}$, that represents average ranking for movie $i$:
+We will compute the estimated deviation of each movies’ mean rating from the total mean of all movies $\mu$. The resulting variable is called "b" ( as bias ) for each movie "i" $b_{i}$, that represents average ranking for movie $i$:
 $$Y_{u, i} = \mu +b_{i}+ \epsilon_{u, i}$$
 
-The histogram is left skewed, implying that more movies have negative effects
+The created histogram is left skewed, suggesting that more movies have negative effects.
 
 
 ```{r Number_of_movies_with_the computed_b_m, echo = TRUE, fig.height=3, fig.width=4}
@@ -334,9 +330,7 @@ ylab = "Number of movies", main = "Number of movies with the computed b_m")
 ```
 
 
-This is called the penalty term movie effect.
-
-Our prediction improve once we predict using this model.
+Our prediction improve once we predict using this model:
 
 ```{r predicted_ratings, echo = TRUE}
 predicted_ratings <- mu +  validation %>%
@@ -350,12 +344,12 @@ rmse_results %>% knitr::kable()
 ```
 
 
-So we have predicted movie rating based on the fact that movies are rated differently by adding the computed $b_{i}$ to $\mu$. If an individual movie is on average rated worse that the average rating of all movies $\mu$ , we predict that it will rated lower that $\mu$ by $b_{i}$, the difference of the individual movie average from the total average.
+By adding the computed $b_{i}$ to $\mu$, we are able to predict movie ratings. If an individual movie is on average rated worse that the average rating of all movies $\mu$ , we predict that it will rated lower that $\mu$ by $b_{i}$, the difference of the individual movie average from the total average.
 
 
-### III. Movie + User Effects Model
+### 3) Movie + User Effects Model
 
-It is understood that users may have a tendency to rate movies higher or lower than the overall mean. Let's add this into the model. First we'll calculate the bias for each user:
+Users may have a tendency to rate movies higher or lower than the overall mean, so we can take this into account by incorporating it into the next model. First we will calculate the bias for each user:
 
 $$b_{u} = Mean_{user} - \mu$$
 Then we'll combine the bias of a user, with the bias of a film and add both to the overall mean for a combined bias rating for each unique combination of a user rating for a given film.
@@ -372,7 +366,7 @@ user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("bl
 ```
 
 
-We compute an approximation by computing $\mu$ and $b_{i}$, and estimating  $b_{u}$, as the average of $$Y_{u, i} - \mu - b_{i}$$
+By computing $\mu$ and $b_{i}$, we can compute an approximation, and estimate $b_{u}$ as the average of $$Y_{u, i} - \mu - b_{i}$$
   
 ```{r user_effects, echo = TRUE}
 user_effects <- edx %>%
@@ -381,7 +375,7 @@ user_effects <- edx %>%
   summarize(b_u = mean(rating - mu - b_m))
 ```
 
-We can now construct predictors and see RMSE improves:
+Now, we can create predictors and see how the RMSE improves:
   
   
 ```{r model_2_rmse, echo = TRUE}
@@ -398,12 +392,11 @@ rmse_results %>% knitr::kable()
 ```
 
 
-Our rating predictions further reduced the RMSE. But we made stil mistakes on our first model (using only movies). The supposes “best “ and “worst “movie were rated by few users, in most cases just one user. These movies were mostly obscure ones. This is because with a few users, we have more uncertainty. Therefore larger estimates of $b_{i}$, negative or positive, are more likely.
-Large errors can increase our RMSE. 
+The Movie Effect Model was flawed as we only accounted for the "movieID" predictor, so with the addition of the "userID" predictor, our third model's rating predictions achieved a far lower RMSE value. Howeever, fewer users results in increased uncertainty of our predictions. Due to this, larger estimates of $b_{i}$, negative or positive, are more likely. To prevent these larger estimates from negatively impacting our RMSE, we will create a regularized model to avoid such circumstances.
 
-### IV. Regularized Movie + User Effects Model
+### 4) Regularized Movie + User Effects Model
 
-The general idea behind regularization is to constrain the total variability of the effect size. As lambda is a tuning parameter, we can use cross-validation to choose optimized one for model building and performance evaluation.
+Regularization is typically used to limit the overall fluctuation, or variability, of the effect size. Lambda is a tuning parameter, so we can use cross-validation to select the best one for model construction and performance assessment.
 
 ```{r message=FALSE, warning=FALSE}
 lambdas <- seq(0, 10, 0.25)
@@ -440,25 +433,21 @@ rmse_results <- bind_rows(rmse_results,
 rmse_results %>% knitr::kable()
 ```
 
-Now we finally achieve the goal of RMSE which is less than 0.86490 by model of regularization of movie and user effects. The new RMSE is 0.8648. 
+Through the Regularized Movie + User Effects Model, we have finally achieved the target RMSE (less than 0.86490) with a RMSE value of 0.8648170. 
 
 \pagebreak
 
 # Results
 
-The RMSE values of all the represented models are the following:
+The table below shows the RMSE values achieved by all four models examined over the course of this report:
 
 ```
 rmse_results %>% knitr::kable()
 ```
 
-We therefore found the lowest value of RMSE that is 0.8648170.
-
-So we can confirm that the final model for our project is the Regularized movie and user effect model:
+We drastically reduced the initial RMSE of 1.0612018 to 0.8648170 with the Regularized Movie + User Effect Model:
 
 $$Y_{u, i} = \mu + b_{m} + b_{u} + \epsilon_{u, m}$$
-
-As expected, the RMSE decreased while the model increases complexity. We can even discuss if a good alternative is to increase the parameters of the models like inlude genres, however to split the genres in the data we need more advanced hardware. 
 
 # Conclusion
 
