@@ -11,7 +11,7 @@ As the instructions necessitate, the following three files are attached: <br />
 3. MovieLensRScript <br />
 
 # c. Timeline of Project
-4/23/22 - Start Date <br />
+6/23/22 - Start Date <br />
 7/15/22 - Completion of Rmd and RScript <br />
-8/12/22 - End Date <br />
+8/13/22 - End Date <br />
 
