@@ -387,26 +387,24 @@ As expected, the RMSE decreased while the model increases complexity. We can eve
 
 In order to construct a movie recommendation algorithm with a sufficiently low RMSE, I have employed an iterative applied machine learning approach. Beginning with a naive approach, I developed models that branched out to MovieLens features such as movie and user effects, and applied the regularization technique to further cut down the RMSE value.
 
-Considering the fact that only two predictors, "movieId" and "userId", were used to obtain the desired RMSE value, there is far more potential that can be realized through the incorporation of other predictors such as "genres" and "releaseYear".
-
-A drastic RMSE reduction would be possible with the use of a larger dataset. The MovieLens 10M dataset could be swapped for the 25M dataset also offered on the GroupLens website to nearly triple the number of ratings at our disposal.
+Considering the fact that only two predictors, "movieId" and "userId", were used to obtain the desired RMSE value, there is far more potential that can be realized through the incorporation of other predictors such as "genres" and "releaseYear". A drastic RMSE reduction would also be possible with the use of a larger dataset. The MovieLens 10M dataset could be swapped for the 25M dataset offered on the GroupLens website to nearly triple the number of ratings at my disposal.
 
 While there is clear room for improvement, the Regularized Movie + User Effects Model satisfies the primary goal of the MovieLens Project, making this venture an overall success.
 
-### Limitations
+## Limitations
 
 My MovieLens Project encounter several limitations that I hope to address in the future, perhaps through the assistance of my peer reviewers. 
 
 1) Software/Hardware Limitations: I have attempted several advanced machine learning models that could have reduced the RMSE further, such as k-NN models, but the lackluster processing power and RAM of my laptop has currently made it difficult to do so. 
 2) Exploratory Limitations: A higher understanding of the MovieLens dataset would have allowed me to fine-tune the models further.
 
-### Future Works
+## Future Works
 
 As summarized above, my attempts at creating a better model has been hampered by the limitations of my device and my understanding of the MovieLens dataset. However, I intend on trying additional models that show much promise.
 
 1) Installing the recosystem package to utilize Matrix Factorization.
 2) Utilize PCA (Principal Component Analysis) to improve visualization of the data.
 
-### Acknowledgements
+## Acknowledgements
 
 I would like to thank Professor Rafael Irizarry, as well as the countless educators, moderators, and supervisors that have contributed to the HarvardX Professional Data Science Certificate Program. Their collective efforts have provided one of the best remote learning experiences I have had to date, and I am extremely grateful to have studied the R programming language under such accredited curriculum. I also share my gratitude and heartfelt thanks to my fellow peers, whose discussions on the interactive forums have given me invaluable insight throughout the journey. Lastly, I would like to acknowledge my parents, who have never stopped supporting my dreams.
