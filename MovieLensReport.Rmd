@@ -191,7 +191,7 @@ We can see, in the figure below, that the rating distribution has a left-skewed 
 ```{r rating_distribution, echo = FALSE}
 edx %>%
   ggplot(aes(rating)) +
-  geom_histogram(binwidth = 0.25, color = "blue3") +
+  geom_histogram(binwidth = 0.25, color = "blue4") +
   scale_x_discrete(limits = c(seq(0.5,5,0.5))) +
   scale_y_continuous(breaks = c(seq(0, 3000000, 500000))) +
   ggtitle("Rating distribution")
@@ -205,7 +205,7 @@ We can plot the data and determine that some movies are rated more often than ot
 edx %>%
 count(movieId) %>%
 ggplot(aes(n)) +
-geom_histogram(bins = 30, color = "blue3") +
+geom_histogram(bins = 30, color = "blue4") +
 scale_x_log10() +
 xlab("Number of ratings") +
   ylab("Number of movies") +
@@ -237,7 +237,7 @@ The majority of users have rated below 100 movies, but also above 30 movies (a u
 edx %>%
 count(userId) %>%
 ggplot(aes(n)) +
-geom_histogram(bins = 30, color = "blue3") +
+geom_histogram(bins = 30, color = "blue4") +
 scale_x_log10() +
 xlab("Number of ratings") + 
 ylab("Number of users") +
@@ -254,7 +254,7 @@ edx %>%
   filter(n() >= 100) %>%
   summarize(b_u = mean(rating)) %>%
   ggplot(aes(b_u)) +
-  geom_histogram(bins = 30, color = "blue3") +
+  geom_histogram(bins = 30, color = "blue4") +
   xlab("Mean rating") +
   ylab("Number of users") +
   ggtitle("Mean movie ratings given by users") +
@@ -329,7 +329,7 @@ The histogram is left skewed, implying that more movies have negative effects
 movie_avgs <- edx %>%
   group_by(movieId) %>%
   summarize(b_m = mean(rating - mu))
-movie_avgs %>% qplot(b_m, geom ="histogram", bins = 10, data = ., color = I("blue3"),
+movie_avgs %>% qplot(b_m, geom ="histogram", bins = 10, data = ., color = I("blue4"),
 ylab = "Number of movies", main = "Number of movies with the computed b_m")
 ```
 
@@ -368,7 +368,7 @@ user_effects<- edx %>%
   group_by(userId) %>%
   filter(n() >= 100) %>%
   summarize(b_u = mean(rating - mu - b_m))
-user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("blue3"))
+user_effects%>% qplot(b_u, geom ="histogram", bins = 30, data = ., color = I("blue4"))
 ```
 
 
