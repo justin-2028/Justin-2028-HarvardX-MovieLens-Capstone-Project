@@ -17,4 +17,4 @@ As the instructions necessitate, the following three files are attached: <br />
 
 
 
-## DO NOT COPY this repository and its contents if you are also taking the HarvardX course, there are strict guidelines against plagarism and the edX staff are quite experienced at detecting such. Shortcuts that prevent personal learning should always be avoided!
+<!-- ## DO NOT COPY this repository and its contents if you are also taking the HarvardX course, there are strict guidelines against plagarism and the edX staff are quite experienced at detecting such. Shortcuts that prevent personal learning should always be avoided! --!>
